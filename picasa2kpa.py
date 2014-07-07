@@ -2,7 +2,6 @@ from __future__ import print_function
 
 __author__ = 'dinel'
 
-import codecs
 from lxml import etree
 import os
 import pyexiv2
@@ -10,8 +9,6 @@ import re
 import sys
 
 import utils
-
-path2index = "/media/extra/media/photos/done/"
 
 
 def check_keywords(doc):
@@ -29,6 +26,7 @@ def check_keywords(doc):
     dummy, kid = max(keywords, key=lambda x: int(x[1]))
     etree.SubElement(doc.xpath("//Categories/Category[@name='Keywords']")[0], "value",
                      value="external_info", id=str(int(kid) + 1))
+    
 
 def check_person(doc, name):
     """
@@ -48,6 +46,12 @@ def check_person(doc, name):
 
 def insert_person(doc, node, person):
     # check whether the person exists in the list of persons
+    """
+
+    :param doc:
+    :param node:
+    :param person:
+    """
     check_person(doc, person)
     if doc.xpath("//image[@md5sum='%s']/options/option[@name='Persons']/value[@value='%s']" % (node.get("md5sum"), person)):
         pass
@@ -61,8 +65,10 @@ def insert_person(doc, node, person):
         if not doc.xpath("//image[@md5sum='%s']/options/option[@name='Keywords']" % node.get("md5sum")):
             etree.SubElement(doc.xpath("//image[@md5sum='%s']/options" % node.get("md5sum"))[0], "option", name="Keywords")
 
-        etree.SubElement(doc.xpath("//image[@md5sum='%s']/options/option[@name='Persons']" % node.get("md5sum"))[0], "value", value=person)
-        etree.SubElement(doc.xpath("//image[@md5sum='%s']/options/option[@name='Keywords']" % node.get("md5sum"))[0], "value", value="external_info")
+        etree.SubElement(doc.xpath("//image[@md5sum='%s']/options/option[@name='Persons']" % node.get("md5sum"))[0],
+                         "value", value=person)
+        etree.SubElement(doc.xpath("//image[@md5sum='%s']/options/option[@name='Keywords']" % node.get("md5sum"))[0],
+                         "value", value="external_info")
 
 
 def process_images(path2index, doc, mappings):
@@ -79,7 +85,7 @@ def process_images(path2index, doc, mappings):
             try:
                 img = pyexiv2.metadata.ImageMetadata(path2index + path2file)
                 img.read()
-            except(IOError):
+            except IOError:
                 # the file cannot be read or more likely it is not an image
                 # TODO: have proper testing if it is an image
                 continue
@@ -112,12 +118,21 @@ def read_mappings():
 
 
 if __name__ == "__main__":
+
+    args = utils.create_arguments_parser()
+    print(args)
+
+    path2index = args.directory
+
     doc = utils.read_document(path2index)
-    if not utils.verify_version(doc):
-        print("Incorrect version used")
-        sys.exit(-2)
-    else:
-        print("Correct version found")
+    if not args.no_checking:
+        if not utils.verify_version(doc):
+            print("Incorrect version used")
+            sys.exit(-2)
+        else:
+            print("Correct version found")
+
+    sys.exit(100)
 
     # read the mappings
     mappings = read_mappings()
