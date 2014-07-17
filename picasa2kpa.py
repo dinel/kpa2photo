@@ -2,6 +2,7 @@ from __future__ import print_function
 
 __author__ = 'dinel'
 
+import codecs
 from lxml import etree
 import os
 import pyexiv2
@@ -26,7 +27,7 @@ def check_keywords(doc):
     dummy, kid = max(keywords, key=lambda x: int(x[1]))
     etree.SubElement(doc.xpath("//Categories/Category[@name='Keywords']")[0], "value",
                      value="external_info", id=str(int(kid) + 1))
-    
+
 
 def check_person(doc, name):
     """
@@ -95,7 +96,7 @@ def process_images(path2index, doc, mappings):
                     tag = img.__getitem__(key)
                     if tag.value in mappings: insert_person(doc, image, mappings[tag.value])
 
-def read_mappings():
+def read_mappings(mapping_file):
     """
 
     :rtype : dict
@@ -104,7 +105,7 @@ def read_mappings():
     mappings = {}
 
     try:
-        for line in open("person.map", "r"):
+        for line in codecs.open(mapping_file, "r", encoding="utf8"):
             match = re.search(r"^([^:]+):(.+)$", line.strip())
             if match:
                 mappings[match.group(1)] = match.group(2)
@@ -132,10 +133,8 @@ if __name__ == "__main__":
         else:
             print("Correct version found")
 
-    sys.exit(100)
-
     # read the mappings
-    mappings = read_mappings()
+    mappings = read_mappings(args.mapping)
 
     # check the keywords and update them if necessary
     check_keywords(doc)
