@@ -1,26 +1,8 @@
 from __future__ import print_function
 
-import argparse
 import sys
 from lxml import etree
 
-def create_arguments_parser():
-    parser = argparse.ArgumentParser(description=
-                                     '''
-                                     Transfers information about people embedded in images to the index.xml used
-                                     by KPhotoAlbum
-                                     ''',
-                                     epilog=
-                                     '''More information can be found at''')
-    parser.add_argument('-s', '--separator', default=':', help='The separator for the mapping')
-    parser.add_argument('-i', '--ignore', default='%%', help='Marker for lines to be ignored in the mappings file')
-    parser.add_argument('-m', '--mapping', default='person.map',
-                        help='The file from/in which the mappings are read/written')
-    parser.add_argument('--no-checking', action='store_true', default=False,
-                        help='Do not check the version of the database. Use this option with great care')
-    parser.add_argument('directory', help='The directory that contains the index.xml file')
-
-    return parser.parse_args()
 
 def get_list_elements(doc, tag_name):
     """

@@ -1,7 +1,16 @@
 from __future__ import print_function
 
+'''
+  picasa2kpa: program which transfer information about people embedded by programs such as Picasa in the KPhotoAlbum
+  database
+
+  This program is available under the GNU GPL v3.0 license
+  Please ensure you make a backup of your data before you attempt using it
+'''
+
 __author__ = 'dinel'
 
+import argparse
 import codecs
 from lxml import etree
 import os
@@ -11,6 +20,24 @@ import sys
 
 import utils
 
+
+def create_arguments_parser():
+    parser = argparse.ArgumentParser(description=
+                                     '''
+                                     Transfers information about people embedded in images to the index.xml used
+                                     by KPhotoAlbum
+                                     ''',
+                                     epilog=
+                                     '''More information can be found at https://github.com/dinel/kpa2photo''')
+    parser.add_argument('-s', '--separator', default=':', help='The separator for the mapping')
+    parser.add_argument('-i', '--ignore', default='%%', help='Marker for lines to be ignored in the mappings file')
+    parser.add_argument('-m', '--mapping', default='person.map',
+                        help='The file from/in which the mappings are read/written')
+    parser.add_argument('--no-checking', action='store_true', default=False,
+                        help='Do not check the version of the database. Use this option with great care')
+    parser.add_argument('directory', help='The directory that contains the index.xml file')
+
+    return parser.parse_args()
 
 def check_keywords(doc):
     """
@@ -120,7 +147,7 @@ def read_mappings(mapping_file):
 
 if __name__ == "__main__":
 
-    args = utils.create_arguments_parser()
+    args = create_arguments_parser()
     print(args)
 
     path2index = args.directory
